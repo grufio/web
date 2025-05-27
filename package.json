@@ -1,8 +1,11 @@
 {
-  "name": "grufio-docs",
+  "name": "grufio-web",
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "dev": "next",
+    "build": "next build",
+    "start": "next start",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -12,8 +15,8 @@
   "dependencies": {
     "next": "^15.3.2",
     "nextra": "^4.2.17",
-    "nextra-theme-docs": "^4.2.17",
-    "react": "^19.1.0",
-    "react-dom": "^19.1.0"
+    "nextra-theme-blog": "^4.2.17",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
   }
 }
