@@ -1,0 +1,44 @@
+name: Deploy Nextra Site to Ubuntu Server
+
+on:
+  push:
+    branches:
+      - main # Oder dein Hauptbranch, z.B. master
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18' # Oder die Node.js Version, die du verwendest
+
+      - name: Install dependencies
+        run: npm ci # 'ci' ist oft besser für CI-Umgebungen als 'install'
+
+      - name: Build static site
+        run: npm run build # Dies erzeugt den 'out'-Ordner
+
+      - name: Deploy to server
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.SERVER_HOST }} # IP-Adresse deines Servers
+          username: ${{ secrets.SERVER_USERNAME }} # Benutzername auf dem Server (z.B. grufio)
+          key: ${{ secrets.SSH_PRIVATE_KEY }} # Privater SSH-Schlüssel für den Zugriff
+          port: ${{ secrets.SSH_PORT || 22 }} # SSH-Port, Standard ist 22
+          script: |
+            # Erstelle das Zielverzeichnis, falls es nicht existiert
+            sudo mkdir -p /var/www/grufio-web
+            # Setze die richtigen Berechtigungen, damit der SSH-Benutzer schreiben kann
+            # Dies muss möglicherweise angepasst werden, je nachdem, wie dein Server konfiguriert ist
+            # Es ist besser, wenn der SSH-Benutzer direkt Schreibrechte hat oder sudo ohne Passwort für spezifische Befehle nutzen kann
+            sudo chown -R ${{ secrets.SERVER_USERNAME }}:${{ secrets.SERVER_USERNAME }} /var/www/grufio-web
+            # Synchronisiere den 'out'-Ordner mit dem Web-Root auf dem Server
+            # --delete sorgt dafür, dass alte Dateien im Zielverzeichnis gelöscht werden
+            rsync -avz --delete ./out/ /var/www/grufio-web/
+            # Optional: Nginx neu laden oder starten, falls notwendig (meist nicht für statische Dateien)
+            # sudo systemctl reload nginx 
